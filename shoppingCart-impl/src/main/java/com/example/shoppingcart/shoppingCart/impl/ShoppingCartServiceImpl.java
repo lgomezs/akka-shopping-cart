@@ -1,6 +1,7 @@
 package com.example.shoppingcart.shoppingCart.impl;
 
 import akka.Done;
+import org.slf4j.Logger;
 import akka.NotUsed;
 import akka.japi.Pair;
 import com.lightbend.lagom.javadsl.api.ServiceCall;
@@ -18,6 +19,7 @@ import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
 
 import org.pcollections.TreePVector;
+import org.slf4j.LoggerFactory;
 
 import com.example.shoppingcart.shoppingCart.api.ShoppingCart;
 import com.example.shoppingcart.shoppingCart.api.ShoppingCartItem;
@@ -28,6 +30,8 @@ import com.example.shoppingcart.shoppingCart.impl.ShoppingCartCommand.*;
  * Implementation of the ShoppingCartService.
  */
 public class ShoppingCartServiceImpl implements ShoppingCartService {
+	private static final Logger log = LoggerFactory.getLogger(ShoppingCartServiceImpl.class);
+
 	private final PersistentEntityRegistry persistentEntityRegistry;
 
     @Inject
@@ -42,6 +46,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public ServiceCall<NotUsed, ShoppingCart> get(String id) {
+    	log.info("get() id: " +  id); 
         return request ->
             entityRef(id)
                 .ask(ShoppingCartCommand.Get.INSTANCE)
@@ -50,6 +55,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public ServiceCall<ShoppingCartItem, Done> updateItem(String id) {
+    	log.info("updateItem() id: " +  id); 
         return item ->
             convertErrors(
                 entityRef(id)
@@ -59,6 +65,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public ServiceCall<NotUsed, Done> checkout(String id) {
+    	log.info("checkout() id: " +  id); 
         return request ->
             convertErrors(
                 entityRef(id)
@@ -68,6 +75,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public Topic<ShoppingCart> shoppingCartTopic() {
+    	log.info("#######################  shoppingCartTopic() ####################### " ); 
         // We want to publish all the shards of the shopping cart events
         return TopicProducer.taggedStreamWithOffset(TreePVector.singleton(ShoppingCartEvent.TAG), (tag, offset) ->
             // Load the event stream for the passed in shard tag

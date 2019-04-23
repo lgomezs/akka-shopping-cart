@@ -2,6 +2,9 @@ package com.example.shoppingcart.shoppingCart.impl;
 
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.example.shoppingcart.shoppingCart.impl.ShoppingCartCommand.Checkout;
 import com.example.shoppingcart.shoppingCart.impl.ShoppingCartCommand.Get;
 import com.example.shoppingcart.shoppingCart.impl.ShoppingCartCommand.UpdateItem;
@@ -13,6 +16,8 @@ import akka.Done;
 
 public class ShoppingCartEntity extends PersistentEntity<ShoppingCartCommand, ShoppingCartEvent, ShoppingCartState> {
 
+	private static final Logger log = LoggerFactory.getLogger(ShoppingCartEntity.class);
+	
 	@Override
 	public Behavior initialBehavior(Optional<ShoppingCartState> snapshotState) {
 
@@ -34,11 +39,14 @@ public class ShoppingCartEntity extends PersistentEntity<ShoppingCartCommand, Sh
 		b.setCommandHandler(UpdateItem.class, (cmd, ctx) -> {
 			if (cmd.getQuantity() < 0) {
 				ctx.commandFailed(new ShoppingCartException("Quantity must be greater than zero"));
+				log.info("Quantity must be greater than zero");
 				return ctx.done();
 			} else if (cmd.getQuantity() == 0 && !state().getItems().containsKey(cmd.getProductId())) {
 				ctx.commandFailed(new ShoppingCartException("Cannot delete item that is not already in cart"));
 				return ctx.done();
 			} else {
+				
+				log.info("thenPersist : " + entityId() + " cmd.getProductId() : " + cmd.getProductId() + " cmd.getQuantity() : " + cmd.getQuantity()  );
 				return ctx.thenPersist(new ItemUpdated(entityId(), cmd.getProductId(), cmd.getQuantity()),
 						e -> ctx.reply(Done.getInstance()));
 			}
@@ -50,6 +58,7 @@ public class ShoppingCartEntity extends PersistentEntity<ShoppingCartCommand, Sh
 				ctx.commandFailed(new ShoppingCartException("Cannot checkout empty cart"));
 				return ctx.done();
 			} else {
+				log.info("thenPersist CheckedOut  " );
 				return ctx.thenPersist(new CheckedOut(entityId()), e -> ctx.reply(Done.getInstance()));
 			}
 		});

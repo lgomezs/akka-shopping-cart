@@ -12,9 +12,9 @@
     <modules>
         <module>shoppingCart-api</module>
         <module>shoppingCart-impl</module>
-        <module>streamShoppingcart-api</module>
-        <module>streamShoppingcart-impl</module>
-        <module>integration-tests</module>
+<!--         <module>streamShoppingcart-api</module> -->
+<!--         <module>streamShoppingcart-impl</module> -->
+<!--         <module>integration-tests</module> -->
     </modules>
 
     <build>
